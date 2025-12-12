@@ -14,8 +14,8 @@ AESTHETICS = [
 # Initialize the Zero-Shot Classification Pipeline (Load the model once globally)
 classifier = pipeline(
     "zero-shot-classification", 
-    #lightweight option:
-    model="distilbert-base-uncased", 
+    # CRITICAL: Use the smallest zero-shot model available
+    model="MoritzLaurer/xtremedistil-l6-h256-zeroshot-v1.1-all-33", 
     device=0 if torch.cuda.is_available() else -1 
 )
 
