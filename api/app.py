@@ -1,64 +1,96 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS  # <-- NEW: Import Flask-CORS
-from transformers import pipeline
-import torch 
+from flask_cors import CORS
+import re
 
-# --- 1. Model Initialization ---
+# --- AI Model Libraries (COMMENTED OUT: Memory Too Large for Free Tier) ---
+# import torch 
+# from transformers import pipeline 
+
 app = Flask(__name__)
-CORS(app)  # <-- NEW: Initialize CORS for all routes (origin='*')
+CORS(app) # Initialize CORS
 
-# Define the labels for classification
-AESTHETICS = [
-    "clean girl", "y2k", "dark academia", "cottage core", "coquette", 
-    "soft girl", "vintage", "coastal cowgirl", "mob wife", "old money"
-]
+# --- Aesthetic Keyword Definitions (Operational Logic) ---
+AESTHETIC_KEYWORDS = {
+    "clean girl": ["iced latte", "vanilla", "matcha", "slicked back", "white sneakers", "minimalist", "skincare", "pilates"],
+    "y2k": ["low rise", "cargo", "butterfly clip", "velour", "flip phone", "limewire", "britney", "chunky sneakers"],
+    "dark academia": ["tweed", "oxford", "library", "coffee shop", "poetry", "leather bound", "typewriter", "tea"],
+    "cottage core": ["linen", "flowers", "picnic", "knitting", "tea party", "garden", "mushroom", "pastoral"],
+    "coquette": ["ribbon", "lace", "pearls", "pink", "vintage lingerie", "delicate", "ballet flat"],
+    "soft girl": ["pastel", "sweatpants", "anime", "kawaii", "boba", "oversized hoodie", "cloud", "strawberry"],
+    "vintage": ["thrift", "denim jacket", "records", "old movies", "classic rock", "browns", "earth tones"],
+    "coastal cowgirl": ["cowboy boot", "denim", "beach", "sunset", "hat", "turquoise", "boho"],
+    "mob wife": ["faux fur", "leopard print", "leather", "gold jewelry", "martini", "italian food", "big hair", "nails"],
+    "old money": ["tailored", "tweed", "polo", "yacht", "ivy league", "tennis", "private club", "heirloom"]
+}
 
-# Initialize the Zero-Shot Classification Pipeline 
-# Using the smallest successful model to prevent Out-Of-Memory errors
-classifier = pipeline(
-    "zero-shot-classification", 
-    model="MoritzLaurer/xtremedistil-l6-h256-zeroshot-v1.1-all-33", 
-    device=0 if torch.cuda.is_available() else -1 
-)
+# --- Original AI Model Initialization (COMMENTED OUT: Memory Too Large) ---
+# AESTHETICS = list(AESTHETIC_KEYWORDS.keys()) # Same labels
+# classifier = pipeline(
+#     "zero-shot-classification", 
+#     # Smallest functional model used before hitting OOM error:
+#     model="MoritzLaurer/xtremedistil-l6-h256-zeroshot-v1.1-all-33", 
+#     device=0 if torch.cuda.is_available() else -1 
+# )
 
-# --- 2. API Endpoint ---
-# We now only need the POST method here because CORS handles the OPTIONS request automatically
-@app.route('/classify', methods=['POST']) 
+
+@app.route('/classify', methods=['POST'])
 def classify_identity():
-    # Attempt to parse JSON data from the request body
     data = request.get_json(force=True, silent=True)
     
-    # Handle cases where JSON parsing fails or data is missing
     if not data or 'responses' not in data or not isinstance(data['responses'], list):
         return jsonify({"error": "Invalid input. Expected a list of 'responses' in JSON body."}), 400
 
     user_responses = data['responses']
-    combined_text = " ".join(user_responses)
-
-    # Perform the ZSC
-    result = classifier(
-        combined_text,
-        candidate_labels=AESTHETICS,
-        multi_label=True
-    )
+    combined_text = " ".join(user_responses).lower()
     
-    # Process the results for the top 5
-    aesthetic_scores = sorted(
-        zip(result['labels'], result['scores']),
-        key=lambda x: x[1],
+    aesthetic_scores = {}
+    
+    # ----------------------------------------------------
+    # 1. AI CLASSIFICATION LOGIC (OLD, COMMENTED OUT)
+    # ----------------------------------------------------
+    # result = classifier(
+    #     combined_text,
+    #     candidate_labels=AESTHETICS,
+    #     multi_label=True
+    # )
+    # aesthetic_scores = dict(zip(result['labels'], result['scores']))
+    
+    # ----------------------------------------------------
+    # 1. KEYWORD MATCHING LOGIC (NEW, OPERATIONAL)
+    # ----------------------------------------------------
+    for aesthetic, keywords in AESTHETIC_KEYWORDS.items():
+        score = 0
+        for keyword in keywords:
+            # Use regex to find whole word matches
+            if re.search(r'\b' + re.escape(keyword) + r'\b', combined_text):
+                score += 1
+        aesthetic_scores[aesthetic] = score
+
+    # 2. Sort and Select Top 5
+    sorted_scores = sorted(
+        aesthetic_scores.items(), 
+        key=lambda item: item[1], 
         reverse=True
     )
     
-    top_five = aesthetic_scores[:5]
+    top_five = sorted_scores[:5]
     total_score = sum(score for _, score in top_five)
     
     final_breakdown = {}
-    for label, score in top_five:
-        # Scale the score to be a percentage of the top five's total
-        percentage = round((score / total_score) * 100)
-        final_breakdown[label] = percentage
+    
+    if total_score > 0:
+        # Standard Normalization: If scores exist, calculate percentages based on score total
+        for label, score in top_five:
+            percentage = round((score / total_score) * 100)
+            final_breakdown[label] = percentage
+    else:
+        # Soft Distribution Fallback (Critique Point: Forced Classification)
+        equal_percent = round(100 / 5)
         
-    # Flask-CORS adds the necessary Access-Control-Allow-Origin headers automatically
+        # Distribute the percentage to the top 5 labels (which are all tied at 0)
+        for label, _ in top_five:
+             final_breakdown[label] = equal_percent
+
     return jsonify(final_breakdown)
 
 if __name__ == '__main__':
