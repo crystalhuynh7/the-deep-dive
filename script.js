@@ -1,12 +1,7 @@
 const RENDER_API_ENDPOINT = "https://the-deep-dive-api.onrender.com" + "/classify";
 
 // --- Global Variables for State Management ---
-// Initialize the state to QUESTION
-let state = 'QUESTION'; 
-let currentQuestionIndex = 0;
-
-// --- Global Variables for State Management ---
-let state = 'QUESTION_1'; // Controls which question/screen is visible
+let state = 'QUESTION'; // Controls which question/screen is visible
 let currentQuestionIndex = 0;
 let userResponses = [];
 let aestheticResults = null;
