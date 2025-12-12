@@ -14,7 +14,8 @@ AESTHETICS = [
 # Initialize the Zero-Shot Classification Pipeline (Load the model once globally)
 classifier = pipeline(
     "zero-shot-classification", 
-    model="typeform/mobilebert-uncased-mnli", 
+    #lightweight option:
+    model="distilbert-base-uncased", 
     device=0 if torch.cuda.is_available() else -1 
 )
 
