@@ -1,15 +1,22 @@
 body {
     margin: 0;
-    overflow: hidden; /* Prevent scrollbars from showing when canvas fills screen */
-    background-color: #000; /* Fallback background */
+    overflow: hidden; /* Prevent scrollbars when canvas fills screen */
+    background-color: #000; /* Fallback background color */
 }
 
-/* Ensure the main container takes full screen height */
+/* Ensure the main container takes full screen height and sets a layering context */
 #app-container {
     display: block;
+    position: relative; /* Necessary for z-index on child elements */
+    width: 100vw;
+    height: 100vh;
 }
 
-/* Hide the cursor on the canvas if you want the clean look */
+/* Position the canvas absolutely and at a low z-index */
 canvas {
     cursor: none; 
+    z-index: 1; 
+    position: absolute;
+    top: 0;
+    left: 0;
 }

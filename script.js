@@ -1,11 +1,12 @@
+// !!! CRITICAL: REPLACE THIS WITH YOUR ACTUAL LIVE RENDER API URL !!!
 const RENDER_API_ENDPOINT = "https://the-deep-dive-api.onrender.com" + "/classify";
 
 // --- Global Variables for State Management ---
-let state = 'QUESTION'; // Controls which question/screen is visible
+let state = 'QUESTION'; // Controls which question/screen is visible ('QUESTION', 'LOADING', 'RESULTS')
 let currentQuestionIndex = 0;
 let userResponses = [];
 let aestheticResults = null;
-let inputElement; // P5.js input element
+let inputElement; // P5.js input element (the textbox)
 let loadingAngle = 0; // For the spinner animation
 
 const QUESTIONS = [
@@ -24,20 +25,20 @@ function setup() {
     // Set up text styles
     textSize(24);
     textAlign(CENTER, CENTER);
-    textFont('serif'); // Use a classic font like in your mockup
+    textFont('serif');
     
-    // Create the initial input box (hidden until needed)
+    // Create the initial input box
     inputElement = createInput('');
     inputElement.size(500, 40);
     inputElement.style('font-size', '16px');
     inputElement.style('padding', '5px');
     inputElement.style('border', 'none');
-    inputElement.style('background', 'rgba(100, 100, 100, 0.5)'); // Dark, semi-transparent box
+    inputElement.style('background', 'rgba(100, 100, 100, 0.5)'); // Semi-transparent dark background
     inputElement.style('color', 'white');
     inputElement.style('outline', 'none');
-    inputElement.hide();
-    
-    // Start the process by setting the state and set the initial input box position
+    inputElement.style('z-index', '10'); // CRITICAL: Ensure input is above the canvas
+
+    // Start the process by setting the state and position
     state = 'QUESTION';
     positionInput();
 }
@@ -65,7 +66,7 @@ function draw() {
     }
 }
 
-// Function to handle the transition to the next step
+// Function to handle the transition to the next step when ENTER is pressed
 function keyPressed() {
     if (keyCode === ENTER && state === 'QUESTION') {
         processAnswer();
@@ -79,18 +80,16 @@ function windowResized() {
 
 // Helper to center the input box
 function positionInput() {
+    // We position the input element 50px below the center
     inputElement.position(width / 2 - inputElement.width / 2, height / 2 + 50);
 }
 
-// --- Drawing the Background (Mockup Look) ---
+// --- Drawing the Background (Ethereal Visuals) ---
 function drawEtherealBackground() {
-    // Simple gradient and noise-based visual to mimic the mockup
-    let c1 = color(220, 220, 230, 200); // Light gray/lavender
-    let c2 = color(150, 150, 170, 200); // Slightly darker
-    
+    let c1 = color(220, 220, 230, 200);
     background(c1);
     
-    // Add a layer of dynamic, ethereal noise/lines (mimicking the fractal/streaks)
+    // Add dynamic noise/lines to mimic the fractal/streaks
     noStroke();
     for (let i = 0; i < 100; i++) {
         fill(255, 255, 255, 10);
@@ -103,23 +102,25 @@ function drawEtherealBackground() {
 }
 
 
-// --- Drawing the Question Screen (Like 1.jpg) ---
+// --- Drawing the Question Screen ---
 function drawQuestionScreen() {
-    inputElement.show();
+    // Ensure the input box is positioned correctly (and thus visible)
+    positionInput();
     
     fill(255);
     // Draw the current question
     text(QUESTIONS[currentQuestionIndex], width / 2, height / 2 - 50);
     
-    // Optional: Draw instructions
+    // Draw instructions
     textSize(16);
     text("Press ENTER to submit", width / 2, height / 2 + 100);
 }
 
 
-// --- Drawing the Loading Screen (Like 3.jpg) ---
+// --- Drawing the Loading Screen ---
 function drawLoadingScreen() {
-    inputElement.hide();
+    // Hide the input box by moving it off-screen
+    inputElement.position(-1000, -1000); 
     
     fill(255);
     textSize(30);
@@ -132,7 +133,6 @@ function drawLoadingScreen() {
     strokeWeight(3);
     noFill();
     
-    // Draw 8 dots rotating around a center point
     for (let i = 0; i < 8; i++) {
         let angle = loadingAngle + (i * PI / 4);
         let x = cos(angle) * 15;
@@ -148,8 +148,11 @@ function drawLoadingScreen() {
 }
 
 
-// --- Drawing the Results Screen (Like 4.jpg) ---
+// --- Drawing the Results Screen ---
 function drawResultsScreen() {
+    // Hide the input box by moving it off-screen
+    inputElement.position(-1000, -1000); 
+    
     fill(255);
     textSize(30);
     text("you are....", width / 2, height / 2 - 100);
@@ -158,10 +161,10 @@ function drawResultsScreen() {
         textSize(24);
         let resultString = '';
         
-        // Build the string from the results object
+        // Build the result string (e.g., "20% clean girl, 40% Y2K...")
         Object.entries(aestheticResults).forEach(([aesthetic, percentage], index) => {
             if (index > 0) resultString += ', ';
-            resultString += `${percentage}% ${aesthetic}`;
+            resultString += `${percentage}% ${aesthetic.toUpperCase()}`;
         });
         
         // Draw the result string
@@ -170,19 +173,17 @@ function drawResultsScreen() {
 }
 
 // --- Logic for moving between states ---
-
 function processAnswer() {
-    // 1. Save the current answer
     const answer = inputElement.value();
     if (answer.trim() === '') return; // Don't submit empty answers
+    
     userResponses.push(answer);
     inputElement.value(''); // Clear the input box
     
     currentQuestionIndex++;
     
     if (currentQuestionIndex < QUESTIONS.length) {
-        // More questions remain, stay in QUESTION state
-        // The drawQuestionScreen will automatically show the next question
+        // Move to the next question
     } else {
         // All questions answered, time to move to loading and API call
         state = 'LOADING';
@@ -190,9 +191,8 @@ function processAnswer() {
     }
 }
 
-// --- API Integration (Similar to previous logic) ---
+// --- API Integration ---
 async function callAIApi(responses) {
-    // Ensure your URL is updated before deployment!
     try {
         const response = await fetch(RENDER_API_ENDPOINT, {
             method: 'POST',
@@ -212,8 +212,8 @@ async function callAIApi(responses) {
 
     } catch (error) {
         console.error('API Error:', error);
-        // Handle error visually
-        aestheticResults = { 'ERROR': 100 };
+        // Display an error message if the API fails
+        aestheticResults = { 'API ERROR': 100 };
         state = 'RESULTS';
     }
 }
