@@ -105,21 +105,37 @@ function drawEtherealBackground() {
 // --- Drawing the Question Screen ---
 function drawQuestionScreen() {
     positionInput();
-    
-    // --- DROP SHADOW SIMULATION ---
-    fill(0, 0, 0, 150); // Dark gray/black shadow, semi-transparent
-    
-    // Draw the shadow text slightly offset (e.g., 3 pixels down and right)
-    text(QUESTIONS[currentQuestionIndex], width / 2 + 3, height / 2 - 50 + 3);
-    
-    // --- Actual Text ---
+    // Ensure input stays positioned near the question
+    // Use the canvas 2D context shadow properties for a soft, blurred shadow
+    // Save/restore drawing context around shadow changes so other elements aren't affected
+
+    // Question text (larger)
+    textSize(24);
+    if (drawingContext && drawingContext.save) drawingContext.save();
+    // Soft black shadow behind white text
+    drawingContext.shadowColor = 'rgba(0,0,0,0.6)';
+    drawingContext.shadowBlur = 12;
+    drawingContext.shadowOffsetX = 0;
+    drawingContext.shadowOffsetY = 0;
+
     fill(255); // White text
-    // Draw the current question on top
     text(QUESTIONS[currentQuestionIndex], width / 2, height / 2 - 50);
-    
-    // Draw instructions
+
+    // Restore drawing context so subsequent drawings are not blurred
+    if (drawingContext && drawingContext.restore) drawingContext.restore();
+
+    // Instruction text (smaller) — use a slightly smaller shadow blur
     textSize(16);
+    if (drawingContext && drawingContext.save) drawingContext.save();
+    drawingContext.shadowColor = 'rgba(0,0,0,0.6)';
+    drawingContext.shadowBlur = 8;
+    drawingContext.shadowOffsetX = 0;
+    drawingContext.shadowOffsetY = 0;
+
+    fill(255);
     text("Press ENTER to submit", width / 2, height / 2 + 100);
+
+    if (drawingContext && drawingContext.restore) drawingContext.restore();
 }
 
 
