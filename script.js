@@ -1,5 +1,9 @@
-// !!! REPLACE THIS WITH YOUR ACTUAL RENDER API URL !!!
 const RENDER_API_ENDPOINT = "https://the-deep-dive-api.onrender.com" + "/classify";
+
+// --- Global Variables for State Management ---
+// Initialize the state to QUESTION
+let state = 'QUESTION'; 
+let currentQuestionIndex = 0;
 
 // --- Global Variables for State Management ---
 let state = 'QUESTION_1'; // Controls which question/screen is visible
@@ -38,7 +42,8 @@ function setup() {
     inputElement.style('outline', 'none');
     inputElement.hide();
     
-    // Set the initial input box position
+    // Start the process by setting the state and set the initial input box position
+    state = 'QUESTION';
     positionInput();
 }
 
