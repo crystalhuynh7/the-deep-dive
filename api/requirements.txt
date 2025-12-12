@@ -1,5 +1,5 @@
 Flask
-transformers
-torch
+# transformers 
+# torch
 gunicorn
 Flask-CORS
