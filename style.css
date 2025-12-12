@@ -1,0 +1,15 @@
+body {
+    margin: 0;
+    overflow: hidden; /* Prevent scrollbars from showing when canvas fills screen */
+    background-color: #000; /* Fallback background */
+}
+
+/* Ensure the main container takes full screen height */
+#app-container {
+    display: block;
+}
+
+/* Hide the cursor on the canvas if you want the clean look */
+canvas {
+    cursor: none; 
+}
