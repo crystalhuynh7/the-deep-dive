@@ -1,39 +1,41 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS  # <-- NEW: Import Flask-CORS
 from transformers import pipeline
 import torch 
 
 # --- 1. Model Initialization ---
 app = Flask(__name__)
+CORS(app)  # <-- NEW: Initialize CORS for all routes (origin='*')
 
-# Define the labels outside the function
+# Define the labels for classification
 AESTHETICS = [
     "clean girl", "y2k", "dark academia", "cottage core", "coquette", 
     "soft girl", "vintage", "coastal cowgirl", "mob wife", "old money"
 ]
 
-# Initialize the Zero-Shot Classification Pipeline (Load the model once globally)
+# Initialize the Zero-Shot Classification Pipeline 
+# Using the smallest successful model to prevent Out-Of-Memory errors
 classifier = pipeline(
     "zero-shot-classification", 
-    # CRITICAL: Use the smallest zero-shot model available
     model="MoritzLaurer/xtremedistil-l6-h256-zeroshot-v1.1-all-33", 
     device=0 if torch.cuda.is_available() else -1 
 )
 
 # --- 2. API Endpoint ---
-# The @app.route defines the path your front-end will send data to (e.g., YOUR_RENDER_URL/classify)
-@app.route('/classify', methods=['POST'])
+# We now only need the POST method here because CORS handles the OPTIONS request automatically
+@app.route('/classify', methods=['POST']) 
 def classify_identity():
-    # Allow the front-end (GitHub Pages) to talk to this server (Render)
-    # This is handled automatically by Render, but good to know for testing.
+    # Attempt to parse JSON data from the request body
+    data = request.get_json(force=True, silent=True)
     
-    data = request.get_json(force=True)
-    user_responses = data.get('responses')
-    
-    if not user_responses or not isinstance(user_responses, list):
-        return jsonify({"error": "Invalid input. Expected a list of 'responses'."}), 400
+    # Handle cases where JSON parsing fails or data is missing
+    if not data or 'responses' not in data or not isinstance(data['responses'], list):
+        return jsonify({"error": "Invalid input. Expected a list of 'responses' in JSON body."}), 400
 
+    user_responses = data['responses']
     combined_text = " ".join(user_responses)
 
+    # Perform the ZSC
     result = classifier(
         combined_text,
         candidate_labels=AESTHETICS,
@@ -52,9 +54,11 @@ def classify_identity():
     
     final_breakdown = {}
     for label, score in top_five:
+        # Scale the score to be a percentage of the top five's total
         percentage = round((score / total_score) * 100)
         final_breakdown[label] = percentage
         
+    # Flask-CORS adds the necessary Access-Control-Allow-Origin headers automatically
     return jsonify(final_breakdown)
 
 if __name__ == '__main__':

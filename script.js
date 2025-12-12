@@ -80,8 +80,8 @@ function windowResized() {
 
 // Helper to center the input box
 function positionInput() {
-    // We position the input element 50px below the center
-    inputElement.position(width / 2 - inputElement.width / 2, height / 2 + 50);
+    // closer to the question text
+    inputElement.position(width / 2 - inputElement.width / 2, height / 2 + 10);
 }
 
 // --- Drawing the Background (Ethereal Visuals) ---
@@ -104,11 +104,17 @@ function drawEtherealBackground() {
 
 // --- Drawing the Question Screen ---
 function drawQuestionScreen() {
-    // Ensure the input box is positioned correctly (and thus visible)
     positionInput();
     
-    fill(255);
-    // Draw the current question
+    // --- DROP SHADOW SIMULATION ---
+    fill(0, 0, 0, 150); // Dark gray/black shadow, semi-transparent
+    
+    // Draw the shadow text slightly offset (e.g., 3 pixels down and right)
+    text(QUESTIONS[currentQuestionIndex], width / 2 + 3, height / 2 - 50 + 3);
+    
+    // --- Actual Text ---
+    fill(255); // White text
+    // Draw the current question on top
     text(QUESTIONS[currentQuestionIndex], width / 2, height / 2 - 50);
     
     // Draw instructions
