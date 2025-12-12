@@ -110,7 +110,7 @@ function drawQuestionScreen() {
     // Save/restore drawing context around shadow changes so other elements aren't affected
 
     // Question text (larger)
-    textSize(24);
+    textSize(16);
     if (drawingContext && drawingContext.save) drawingContext.save();
     // Soft black shadow behind white text
     drawingContext.shadowColor = 'rgba(0,0,0,0.6)';
