@@ -11,16 +11,116 @@ CORS(app) # Initialize CORS
 
 # --- Aesthetic Keyword Definitions (Operational Logic) ---
 AESTHETIC_KEYWORDS = {
-    "clean girl": ["iced latte", "vanilla", "matcha", "slicked back", "white sneakers", "minimalist", "skincare", "pilates"],
-    "y2k": ["low rise", "cargo", "butterfly clip", "velour", "flip phone", "limewire", "britney", "chunky sneakers"],
-    "dark academia": ["tweed", "oxford", "library", "coffee shop", "poetry", "leather bound", "typewriter", "tea"],
-    "cottage core": ["linen", "flowers", "picnic", "knitting", "tea party", "garden", "mushroom", "pastoral"],
-    "coquette": ["ribbon", "lace", "pearls", "pink", "vintage lingerie", "delicate", "ballet flat"],
-    "soft girl": ["pastel", "sweatpants", "anime", "kawaii", "boba", "oversized hoodie", "cloud", "strawberry"],
-    "vintage": ["thrift", "denim jacket", "records", "old movies", "classic rock", "browns", "earth tones"],
-    "coastal cowgirl": ["cowboy boot", "denim", "beach", "sunset", "hat", "turquoise", "boho"],
-    "mob wife": ["faux fur", "leopard print", "leather", "gold jewelry", "martini", "italian food", "big hair", "nails"],
-    "old money": ["tailored", "tweed", "polo", "yacht", "ivy league", "tennis", "private club", "heirloom"]
+    "clean girl": [
+        # Broad Additions (Colors, General)
+        "white", "cream", "beige", "ivory", "nude", "taupe", "light gray", "bone", "gold", "silver", "sport", "gym", "running", "routine", "clean", "healthy", "workout", "smoothie", "water", "tea", "coffee", "salad", "oats", "toast",
+        # Keywords (Descriptive)
+        "minimal", "fresh", "simple", "polished", "structured", "elegant", "sophisticated", "effortless", "glowy", "serene", "aspirational", "chic", "put together",
+        # Items/Drinks
+        "iced coffee", "iced latte", "matcha", "green juice", "espresso shot", "almond milk", "oat milk", "cappuccino", "flat white", "smoothie bowl", "white shirt", "trousers", "hoops", "sneakers", "tailored coat", 
+        "blouse", "sweater", "t-shirt", "jeans", "slacks", "tote bag", "blazer",
+        # Actions (Enhanced)
+        "pilates", "yoga", "errands", "working out", "journaling", "wellness", "meditation", "productivity", "walking", "planning", "organizing", "sipping", "reading news"
+    ],
+    "y2k": [
+        # Broad Additions (Colors, General)
+        "hot pink", "lime green", "baby blue", "orange", "yellow", "red", "purple", "metallic", "neon", "music", "party", "dancing", "friends", "out", "phone", "pop", "club", "soda", "pizza", "burger", "candy", "milkshake", "cereal",
+        # Keywords (Descriptive)
+        "chunky", "bright", "girly", "funky", "retro", "bling", "iconic", "futuristic", "playful", "nostalgic", "pop culture", "plastic", "rebellious",
+        # Items/Drinks
+        "frappuccino", "syrup pump", "mocha", "caramel macchiato", "whipped cream", "sugar", "low rise", "cargo", "rhinestone", "clip", "mini skirt", "velour", "flip phone", "graphic tee", "platform", "baguette bag", 
+        "hoodie", "jeans", "sneakers", "skirt", "crop top", "jacket", "dress",
+        # Actions (Enhanced)
+        "clubbing", "arcade", "mall", "gossip", "tiktok", "gaming", "night out", "texting", "hanging out", "shopping", "scrolling", "watching tv"
+    ],
+    "dark academia": [
+        # Broad Additions (Colors, General)
+        "black", "brown", "dark green", "burgundy", "oxblood", "navy", "grey", "khaki", "maroon", "deep red", "charcoal", "study", "library", "reading", "history", "writing", "book", "school", "quiet", "tea", "coffee", "soup", "bread",
+        # Keywords (Descriptive)
+        "intellectual", "vintage", "classic", "moody", "gothic", "scholarly", "romantic", "melancholy", "academic", "paper",
+        # Items/Drinks
+        "black coffee", "espresso", "americano", "earl grey", "darjeeling", "hot tea", "scone", "biscotti", "tweed", "blazer", "cardigan", "wool", "spectacles", "turtleneck", "leather bound", "fountain pen",
+        "coat", "boots", "trousers", "dress", "sweater", "vest", "tie", "loafers",
+        # Actions (Enhanced)
+        "museum", "philosophy", "debating", "poetry", "gallery", "visiting campuses", "rainy days", "researching", "discussing", "listening to podcasts", "taking notes"
+    ],
+    "cottage core": [
+        # Broad Additions (Colors, General)
+        "green", "moss", "tan", "sage", "yellow", "brown", "off-white", "light blue", "dusty rose", "terracotta", "garden", "nature", "cooking", "baking", "home", "animals", "soft", "woods", "tea", "water", "fruit", "vegetables", "scones",
+        # Keywords (Descriptive)
+        "whimsical", "cozy", "homemade", "earthy", "pastoral", "quaint", "slow living", "peaceful", "simple",
+        # Items/Drinks
+        "herbal tea", "scone", "jam", "honey", "lemonade", "lavender latte", "muffin", "croissant", "linen", "dress", "flowers", "straw hat", "mushroom", "picnic", "apron",
+        "skirt", "blouse", "dress", "sandals", "sweater", "boots", "apron",
+        # Actions (Enhanced)
+        "knitting", "foraging", "sewing", "hiking", "walking", "embroidery", "preserving food", "planting", "gathering", "listening to quiet music", "strolling", "caring for"
+    ],
+    "coquette": [
+        # Broad Additions (Colors, General)
+        "light pink", "rose", "peach", "blush", "magenta", "baby pink", "ivory", "girly", "fashion", "beauty", "sweet", "watching", "cake", "dessert", "soda",
+        # Keywords (Descriptive)
+        "ribbon", "lace", "pearls", "delicate", "feminine", "flirty", "dainty", "sultry", "dollish", "romantic", "fragile", "glamour",
+        # Items/Drinks
+        "macaron", "pink drink", "champagne", "rose water", "ballet flat", "bows", "tulle", "vintage", "silk", "lingerie", "corset", "heels",
+        "dress", "skirt", "blouse", "stockings", "cardigan", "slippers",
+        # Actions (Enhanced)
+        "writing letters", "curating", "daydreaming", "listening to classical", "watching movies", "posing", "taking photos", "dressing up", "admiring", "reflecting"
+    ],
+    "soft girl": [
+        # Broad Additions (Colors, General)
+        "pastel", "baby blue", "lilac", "mint", "bubblegum", "lavender", "teal", "cute", "kawaii", "sleeping", "boba", "phone", "gaming", "chill", "nothing", "candy", "chips", "pizza",
+        # Keywords (Descriptive)
+        "comfy", "gentle", "youthful", "playful", "wholesome", "bubbly",
+        # Items/Drinks
+        "milkshake", "smoothie", "hot chocolate", "whipped cream", "sweatpants", "hoodie", "cloud", "strawberry", "platform", "oversized sweater", "anime", "k-pop",
+        "jeans", "t-shirt", "shorts", "sneakers", "skirt", "dress", "socks",
+        # Actions (Enhanced)
+        "snuggling", "crafts", "making faces", "drawing", "playing video games", "tiktok", "watching youtube", "napping", "cuddling", "relaxing", "listening to music"
+    ],
+    "vintage": [
+        # Broad Additions (Colors, General)
+        "mustard", "burnt orange", "terracotta", "maroon", "teal", "rust", "olive", "browns", "deep yellow", "red", "music", "movies", "collecting", "coffee", "tea", "pie", "sandwich",
+        # Keywords (Descriptive)
+        "retro", "classic", "timeless", "denim", "old", "antique", "records", "thrift", "authentic", "nostalgic", "recycled", "worn", "groovy", "pinup",
+        # Items/Drinks
+        "diner coffee", "malt", "milkshake", "soda", "iced tea", "coca-cola", "jacket", "leather", "high-waisted", "flannel", "vinyl", "bell bottoms", "fedora", "suit",
+        "jeans", "dress", "boots", "shoes", "shirt", "coat", "scarf",
+        # Actions (Enhanced)
+        "jazz", "rock and roll", "antiques", "thrift store", "flea market", "restoring", "dancing", "swing", "watching", "listening", "fixing", "searching"
+    ],
+    "coastal cowgirl": [
+        # Broad Additions (Colors, General)
+        "sand", "denim blue", "turquoise", "aqua", "sky blue", "blue", "ocean", "driving", "country", "outdoors", "drinking", "travel", "sun", "beach", "water", "bbq", "tacos",
+        # Keywords (Descriptive)
+        "western", "free spirited", "boho", "rustic", "salty", "laid back", "festival", "adventurous", "shell necklace",
+        # Items/Drinks
+        "iced tea", "lemonade", "cold brew", "iced latte", "muffin", "scone", "cowboy boot", "denim shorts", "fringe", "straw hat", "bandana", "sundress", "crochet",
+        "jeans", "shorts", "shirt", "boots", "hat", "dress", "swimsuit",
+        # Actions (Enhanced)
+        "sunset", "bonfire", "concert", "rodeos", "swimming", "barbecue", "horse riding", "driving", "traveling", "listening to music", "camping", "hiking"
+    ],
+    "mob wife": [
+        # Broad Additions (Colors, General)
+        "black", "leopard", "gold", "red", "scarlet", "silver", "jet black", "burgundy", "crimson", "dark", "dinner", "jewelry", "fashion", "luxury", "eating", "wine", "martini", "steak", "pasta",
+        # Keywords (Descriptive)
+        "bold", "extravagant", "glamorous", "fur", "expensive", "confident", "opulent", "fierce", "sultry", "leather", "dramatic", "smoking",
+        # Items/Drinks
+        "espresso", "cappuccino", "macchiato", "italian soda", "faux fur", "leopard print", "sunglasses", "designer", "nails", "stiletto", "lace dress",
+        "coat", "dress", "heels", "skirt", "jacket", "trousers", "blouse",
+        # Actions (Enhanced)
+        "steakhouse", "casino", "shopping", "gossip", "bossy", "private events", "drinking", "dining", "talking", "arranging"
+    ],
+    "old money": [
+        # Broad Additions (Colors, General)
+        "navy", "forest green", "hunter green", "light blue", "royal blue", "money", "sport", "golf", "tennis", "water", "tea", "salad", "wine", "cocktail",
+        # Keywords (Descriptive)
+        "preppy", "classic", "tailored", "traditional", "elite", "conservative", "polished", "discreet", "heritage", "family",
+        # Items/Drinks
+        "sparkling water", "coffee", "latte", "english breakfast", "earl grey", "polo", "cashmere", "pearls", "loafers", "monogram", "tweed", "button-down", "blazer",
+        "shirt", "sweater", "trousers", "skirt", "coat", "shoes", "jacket",
+        # Actions (Enhanced)
+        "investing", "private club", "gala", "sailing", "quiet dinner", "reading", "discussing", "planning", "hosting", "attending", "vacationing"
+    ]
 }
 
 # --- Original AI Model Initialization (COMMENTED OUT: Memory Too Large) ---
