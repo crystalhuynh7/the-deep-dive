@@ -1,5 +1,6 @@
 // !!! CRITICAL: REPLACE THIS WITH YOUR ACTUAL LIVE RENDER API URL !!!
 const RENDER_API_ENDPOINT = "https://the-deep-dive-api.onrender.com" + "/classify";
+const FIREBASE_URL = "https://the-deep-dive-0-default-rtdb.firebaseio.com" + "/reflections.json";
 
 // --- Global Variables for State Management ---
 let state = 'QUESTION'; // Controls which question/screen is visible ('QUESTION', 'LOADING', 'RESULTS')
@@ -8,6 +9,10 @@ let userResponses = [];
 let aestheticResults = null;
 let inputElement; // P5.js input element (the textbox)
 let loadingAngle = 0; // For the spinner animation
+
+// Archive for Mesh
+let archiveData = [];
+let meshParticles = [];
 
 const QUESTIONS = [
     "you are walking into a cafe, what are you ordering?",
@@ -41,6 +46,9 @@ function setup() {
     // Start the process by setting the state and position
     state = 'QUESTION';
     positionInput();
+
+    // Initial fetch of the archive for the "moving mesh"
+    fetchArchive();
 }
 
 function draw() {
@@ -61,15 +69,126 @@ function draw() {
             drawLoadingScreen();
             break;
         case 'RESULTS':
-            drawResultsScreen();
+            drawPieChartScreen();
+            break;
+        case 'REFLECT':
+            drawReflectionScreen();
+            break;
+        case 'ARCHIVE':
+            drawArchiveMesh();
             break;
     }
+}
+
+// --- 1. THE PIE CHART (Results) ---
+function drawPieChartScreen() {
+    inputElement.position(-1000, -1000); 
+    let centerX = width / 2;
+    let centerY = height / 2;
+    let diameter = 350;
+    let lastAngle = 0;
+
+    let results = Object.entries(aestheticResults);
+    
+    results.forEach(([label, percent], i) => {
+        let angle = map(percent, 0, 100, 0, TWO_PI);
+        
+        // Dynamic colors
+        fill(150, 180, 200 + (i * 10), 200);
+        stroke(255, 50);
+        arc(centerX, centerY, diameter, diameter, lastAngle, lastAngle + angle, PIE);
+
+        // Hover Detection
+        let mouseAngle = atan2(mouseY - centerY, mouseX - centerX);
+        if (mouseAngle < 0) mouseAngle += TWO_PI;
+        
+        if (dist(mouseX, mouseY, centerX, centerY) < diameter/2 && 
+            mouseAngle > lastAngle && mouseAngle < lastAngle + angle) {
+            fill(255);
+            noStroke();
+            textSize(22);
+            text(`${label.toUpperCase()}: ${percent}%`, mouseX, mouseY - 20);
+        }
+        lastAngle += angle;
+    });
+
+    fill(255);
+    textSize(18);
+    text("Click anywhere to continue", width / 2, height - 50);
+}
+
+// --- 2. THE REFLECTION ("That's you, right?") ---
+function drawReflectionScreen() {
+    positionInput();
+    fill(255);
+    textSize(24);
+    text("that's you, right?", width / 2, height / 2 - 80);
+    textSize(14);
+    text("Type your reflection and press ENTER to archive your identity", width / 2, height / 2 + 80);
+}
+
+// --- 3. THE MOVING MESH ---
+function drawArchiveMesh() {
+    inputElement.position(-1000, -1000);
+    
+    meshParticles.forEach(p => {
+        p.update();
+        p.display();
+    });
+
+    fill(255, 200);
+    textSize(32);
+    text("The Collective Archive", width / 2, 100);
+}
+
+// --- Firebase & Logic ---
+async function fetchArchive() {
+    try {
+        let response = await fetch(FIREBASE_URL);
+        let data = await response.json();
+        if (data) {
+            archiveData = Object.values(data).map(obj => obj.reflection);
+            // Create particles for each archived reflection
+            meshParticles = archiveData.map(txt => new Particle(txt));
+        }
+    } catch (e) { console.error("Archive fetch failed", e); }
+}
+
+async function saveToFirebase(reflection) {
+    const payload = {
+        reflection: reflection,
+        timestamp: Date.now(),
+        top_aesthetic: Object.keys(aestheticResults)[0]
+    };
+    await fetch(FIREBASE_URL, { method: 'POST', body: JSON.stringify(payload) });
+    await fetchArchive(); // Refresh mesh
+    state = 'ARCHIVE';
 }
 
 // Function to handle the transition to the next step when ENTER is pressed
 function keyPressed() {
     if (keyCode === ENTER && state === 'QUESTION') {
         processAnswer();
+    }
+}
+
+// Particle class for the "Moving Mesh"
+class Particle {
+    constructor(txt) {
+        this.txt = txt;
+        this.pos = createVector(random(width), random(height));
+        this.vel = createVector(random(-0.5, 0.5), random(-0.5, 0.5));
+        this.noiseSeed = random(1000);
+    }
+    update() {
+        this.pos.add(this.vel);
+        if (this.pos.x < 0 || this.pos.x > width) this.vel.x *= -1;
+        if (this.pos.y < 0 || this.pos.y > height) this.vel.y *= -1;
+    }
+    display() {
+        fill(255, 120);
+        textSize(12);
+        text(this.txt, this.pos.x, this.pos.y);
     }
 }
 

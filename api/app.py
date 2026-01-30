@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import re
+import requests # NEW: for Firebase communication
 
 # --- AI Model Libraries (COMMENTED OUT: Memory Too Large for Free Tier) ---
 # import torch 
@@ -8,6 +9,9 @@ import re
 
 app = Flask(__name__)
 CORS(app) # Initialize CORS
+
+# Firebase Database URL
+FIREBASE_URL = ""
 
 # --- Aesthetic Keyword Definitions (Operational Logic) ---
 AESTHETIC_KEYWORDS = {
@@ -192,6 +196,44 @@ def classify_identity():
              final_breakdown[label] = equal_percent
 
     return jsonify(final_breakdown)
+
+@app.route('/reflect', methods=['POST'])
+def save_reflection():
+    """Endpoint to save the 'That's you, right?' response to the database."""
+    data = request.get_json(force=True, silent=True)
+    
+    if not data or 'reflection' not in data:
+        return jsonify({"error": "Missing reflection text"}), 400
+
+    # Prepare data for Firebase
+    payload = {
+        "text": data['reflection'],
+        "top_aesthetic": data.get('top_aesthetic', 'unknown'),
+        "timestamp": {".sv": "timestamp"} # Firebase server-side timestamp
+    }
+
+    try:
+        response = requests.post(FIREBASE_URL, json=payload)
+        return jsonify({"status": "success", "id": response.json()['name']}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/archive', methods=['GET'])
+def get_archive():
+    """Endpoint to fetch all reflections to power the moving mesh background."""
+    try:
+        response = requests.get(FIREBASE_URL)
+        archive_data = response.json()
+        
+        # Flatten the Firebase dictionary into a list for easier P5.js processing
+        reflections = []
+        if archive_data:
+            for key in archive_data:
+                reflections.append(archive_data[key]['text'])
+        
+        return jsonify(reflections)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
