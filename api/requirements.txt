@@ -3,3 +3,4 @@ Flask
 # torch
 gunicorn
 Flask-CORS
+requests
