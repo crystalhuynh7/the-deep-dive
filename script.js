@@ -83,6 +83,8 @@ function draw() {
 // --- 1. THE PIE CHART (Results) ---
 function drawPieChartScreen() {
     inputElement.position(-1000, -1000); 
+    cursor(ARROW); // Ensure the mouse stays normal
+    
     let centerX = width / 2;
     let centerY = height / 2;
     let diameter = 350;
@@ -104,17 +106,32 @@ function drawPieChartScreen() {
         
         if (dist(mouseX, mouseY, centerX, centerY) < diameter/2 && 
             mouseAngle > lastAngle && mouseAngle < lastAngle + angle) {
+            
+            // Calculate center of the slice to "stick" the text there
+            let midAngle = lastAngle + angle / 2;
+            let textDist = diameter * 0.35; // Position text inside the slice
+            let tx = centerX + cos(midAngle) * textDist;
+            let ty = centerY + sin(midAngle) * textDist;
+
             fill(255);
             noStroke();
-            textSize(22);
-            text(`${label.toUpperCase()}: ${percent}%`, mouseX, mouseY - 20);
+            textSize(18);
+            text(`${label.toUpperCase()}\n${percent}%`, tx, ty);
         }
         lastAngle += angle;
     });
 
     fill(255);
     textSize(18);
-    text("Click anywhere to continue", width / 2, height - 50);
+    text("Click anywhere to continue", width / 2, height - 100);
+}
+
+// --- THE CLICK HANDLER ---
+function mousePressed() {
+    // If the user is on the Results screen, clicking moves them to Reflection
+    if (state === 'RESULTS') {
+        state = 'REFLECT';
+    }
 }
 
 // --- 2. THE REFLECTION ("That's you, right?") ---
