@@ -83,47 +83,52 @@ function draw() {
 // --- 1. THE PIE CHART (Results) ---
 function drawPieChartScreen() {
     inputElement.position(-1000, -1000); 
-    cursor(ARROW); // Ensure the mouse stays normal
+    cursor(ARROW); // Keeps the mouse cursor as a normal pointer
     
     let centerX = width / 2;
     let centerY = height / 2;
-    let diameter = 350;
+    let diameter = 300; // Slightly smaller to give the UI more breathing room
     let lastAngle = 0;
 
-    let results = Object.entries(aestheticResults);
-    
-    results.forEach(([label, percent], i) => {
-        let angle = map(percent, 0, 100, 0, TWO_PI);
+    if (aestheticResults) {
+        let results = Object.entries(aestheticResults);
         
-        // Dynamic colors
-        fill(150, 180, 200 + (i * 10), 200);
-        stroke(255, 50);
-        arc(centerX, centerY, diameter, diameter, lastAngle, lastAngle + angle, PIE);
-
-        // Hover Detection
-        let mouseAngle = atan2(mouseY - centerY, mouseX - centerX);
-        if (mouseAngle < 0) mouseAngle += TWO_PI;
-        
-        if (dist(mouseX, mouseY, centerX, centerY) < diameter/2 && 
-            mouseAngle > lastAngle && mouseAngle < lastAngle + angle) {
+        results.forEach(([label, percent], i) => {
+            let angle = map(percent, 0, 100, 0, TWO_PI);
             
-            // Calculate center of the slice to "stick" the text there
-            let midAngle = lastAngle + angle / 2;
-            let textDist = diameter * 0.35; // Position text inside the slice
-            let tx = centerX + cos(midAngle) * textDist;
-            let ty = centerY + sin(midAngle) * textDist;
+            // Slice Color
+            fill(150, 180, 200 + (i * 10), 200);
+            stroke(255, 50);
+            arc(centerX, centerY, diameter, diameter, lastAngle, lastAngle + angle, PIE);
 
-            fill(255);
-            noStroke();
-            textSize(18);
-            text(`${label.toUpperCase()}\n${percent}%`, tx, ty);
-        }
-        lastAngle += angle;
-    });
+            // Hover Logic
+            let mouseAngle = atan2(mouseY - centerY, mouseX - centerX);
+            if (mouseAngle < 0) mouseAngle += TWO_PI;
+            
+            if (dist(mouseX, mouseY, centerX, centerY) < diameter/2 && 
+                mouseAngle > lastAngle && mouseAngle < lastAngle + angle) {
+                
+                // Position text at a fixed point inside the slice (drop-down style)
+                let midAngle = lastAngle + angle / 2;
+                let textOffset = diameter * 0.3; // Distance from center
+                let tx = centerX + cos(midAngle) * textOffset;
+                let ty = centerY + sin(midAngle) * textOffset;
 
-    fill(255);
-    textSize(18);
-    text("Click anywhere to continue", width / 2, height - 100);
+                noStroke();
+                fill(255);
+                textSize(14); // Smaller text for a cleaner look
+                textAlign(CENTER, CENTER);
+                text(`${label.toUpperCase()}\n${percent}%`, tx, ty);
+            }
+            lastAngle += angle;
+        });
+    }
+
+    // Repositioned instruction text to avoid overlap with "The Deep Dive"
+    fill(255, 180);
+    textSize(16);
+    textAlign(CENTER, CENTER);
+    text("click anywhere to continue", width / 2, height / 2 + 220);
 }
 
 // --- THE CLICK HANDLER ---
