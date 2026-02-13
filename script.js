@@ -170,14 +170,25 @@ function drawReflectionScreen() {
 function drawArchiveMesh() {
     inputElement.position(-1000, -1000);
     
+    // Apply the same shadow style as the question prompts
+    if (drawingContext && drawingContext.save) drawingContext.save();
+    drawingContext.shadowColor = 'rgba(0,0,0,0.6)';
+    drawingContext.shadowBlur = 12;
+    drawingContext.shadowOffsetX = 0;
+    drawingContext.shadowOffsetY = 0;
+
+    fill(255, 200);
+    textSize(32);
+    textAlign(CENTER, CENTER); // Ensures the text is perfectly centered
+    text("The Collective Archive", width / 2, 100);
+
+    // Restore context so the shadow doesn't affect the particles
+    if (drawingContext && drawingContext.restore) drawingContext.restore();
+    
     meshParticles.forEach(p => {
         p.update();
         p.display();
     });
-
-    fill(255, 200);
-    textSize(32);
-    text("The Collective Archive", width / 2, 100);
 }
 
 // --- Firebase & Logic ---
