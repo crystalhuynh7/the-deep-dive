@@ -47,8 +47,17 @@ function setup() {
     state = 'QUESTION';
     positionInput();
 
+    // WAKE UP CALL: Sends a dummy request to Render immediately 
+    // so it's awake by the time the user finishes the 5th question.
+    fetch(RENDER_API_ENDPOINT, { 
+        method: 'POST', 
+        body: JSON.stringify({ responses: ["wake up"] }) 
+    }).catch(e => console.log("Waking up server..."));
+
     // Initial fetch of the archive for the "moving mesh"
     fetchArchive();
+
+
 }
 
 function draw() {
@@ -183,17 +192,16 @@ async function saveToFirebase(reflection) {
         top_aesthetic: Object.keys(aestheticResults)[0]
     };
     
+    // Switch state immediately for a "fast" feel
+    state = 'ARCHIVE'; 
+
     try {
         await fetch(FIREBASE_URL, { 
             method: 'POST', 
             body: JSON.stringify(payload) 
         });
-        
-        // Refresh the local data so your new response appears in the mesh
-        await fetchArchive(); 
-        
-        // Move to the final "Archive Mesh" screen
-        state = 'ARCHIVE'; 
+        // Update the mesh in the background
+        fetchArchive(); 
     } catch (e) { 
         console.error("Firebase save failed", e); 
     }
@@ -338,7 +346,7 @@ function drawLoadingScreen() {
 
 
 // --- Drawing the Results Screen ---
-function drawResultsScreen() {
+/* function drawResultsScreen() {
     // Hide the input box by moving it off-screen
     inputElement.position(-1000, -1000); 
     
@@ -360,6 +368,7 @@ function drawResultsScreen() {
         text(resultString, width / 2, height / 2);
     }
 }
+*/
 
 // --- Logic for moving between states ---
 function processAnswer() {
@@ -376,12 +385,13 @@ function processAnswer() {
     } else {
         // All questions answered, time to move to loading and API call
         state = 'LOADING';
-        callAIApi(userResponses);
+        processResults(userResponses);
     }
 }
 
 // --- API Integration ---
-async function callAIApi(responses) {
+async function processResults(responses) {
+    console.log("Sending data to Render..."); // Trace the start
     try {
         const response = await fetch(RENDER_API_ENDPOINT, {
             method: 'POST',
@@ -397,12 +407,13 @@ async function callAIApi(responses) {
         }
 
         aestheticResults = await response.json(); 
-        state = 'RESULTS'; // Move to results screen on success
+        console.log("Data received:", aestheticResults); // Trace the end
+        state = 'RESULTS'; 
 
     } catch (error) {
         console.error('API Error:', error);
-        // Display an error message if the API fails
-        aestheticResults = { 'API ERROR': 100 };
+        // Fallback so the user isn't stuck forever
+        aestheticResults = { 'ERROR': 100 };
         state = 'RESULTS';
     }
 }
