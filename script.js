@@ -19,7 +19,7 @@ const QUESTIONS = [
     "what are you wearing today?",
     "it is friday night, what are you most likely doing in this moment?",
     "pretend you are at your favorite restaurant. where are you, and what are you ordering?",
-    "tell me about your favorite social media platform and talk about your favorite creator. if you don't like social media, tell me why or what else you consume."
+    "tell me about your favorite social media platform and talk about your favorite creator. \nif you don't like social media, tell me why or what else you consume."
 ];
 
 function setup() {
@@ -96,7 +96,7 @@ function drawPieChartScreen() {
     
     let centerX = width / 2;
     let centerY = height / 2;
-    let diameter = 300; 
+    let diameter = 280; // Smaller to prevent overlap
     let lastAngle = 0;
 
     if (aestheticResults) {
@@ -141,11 +141,14 @@ function drawPieChartScreen() {
         });
     }
 
-    // Positioned to clear "The Deep Dive" footer
+    // Shadow for "Click anywhere"
+    push();
+    drawingContext.shadowColor = 'rgba(0,0,0,0.6)';
+    drawingContext.shadowBlur = 10;
     fill(255, 180);
     textSize(16);
-    textAlign(CENTER, CENTER);
     text("click anywhere to continue", width / 2, height / 2 + 250);
+    pop();
 }
 
 // --- THE CLICK HANDLER ---
@@ -159,31 +162,30 @@ function mousePressed() {
 // --- 2. THE REFLECTION ("That's you, right?") ---
 function drawReflectionScreen() {
     positionInput();
+    push();
+    drawingContext.shadowColor = 'rgba(0,0,0,0.6)';
+    drawingContext.shadowBlur = 12;
     fill(255);
-    textSize(24);
-    text("that's you, right?", width / 2, height / 2 - 80);
+    textSize(28); // Larger
+    text("That's you, right?", width / 2, height / 2 - 100);
+    
     textSize(14);
-    text("Type your reflection and press ENTER to archive your identity", width / 2, height / 2 + 80);
+    text("Type your reflection and press ENTER to archive your identity", width / 2, height / 2 + 100);
+    pop();
 }
 
 // --- 3. THE MOVING MESH ---
 function drawArchiveMesh() {
     inputElement.position(-1000, -1000);
     
-    // Apply the same shadow style as the question prompts
-    if (drawingContext && drawingContext.save) drawingContext.save();
+    push();
     drawingContext.shadowColor = 'rgba(0,0,0,0.6)';
     drawingContext.shadowBlur = 12;
-    drawingContext.shadowOffsetX = 0;
-    drawingContext.shadowOffsetY = 0;
-
+    textAlign(CENTER, CENTER); // Force centering
     fill(255, 200);
     textSize(32);
-    textAlign(CENTER, CENTER); // Ensures the text is perfectly centered
     text("The Collective Archive", width / 2, 100);
-
-    // Restore context so the shadow doesn't affect the particles
-    if (drawingContext && drawingContext.restore) drawingContext.restore();
+    pop();
     
     meshParticles.forEach(p => {
         p.update();
