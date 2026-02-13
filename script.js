@@ -96,7 +96,7 @@ function drawPieChartScreen() {
     
     let centerX = width / 2;
     let centerY = height / 2;
-    let diameter = 300; // Slightly smaller to give the UI more breathing room
+    let diameter = 300; 
     let lastAngle = 0;
 
     if (aestheticResults) {
@@ -105,39 +105,47 @@ function drawPieChartScreen() {
         results.forEach(([label, percent], i) => {
             let angle = map(percent, 0, 100, 0, TWO_PI);
             
-            // Slice Color
+            // Calculate endAngle and force the last slice to close the gap
+            let endAngle = lastAngle + angle;
+            if (i === results.length - 1) {
+                endAngle = TWO_PI;
+            }
+
+            // Draw the Slice
             fill(150, 180, 200 + (i * 10), 200);
             stroke(255, 50);
-            arc(centerX, centerY, diameter, diameter, lastAngle, lastAngle + angle, PIE);
+            arc(centerX, centerY, diameter, diameter, lastAngle, endAngle, PIE);
 
             // Hover Logic
             let mouseAngle = atan2(mouseY - centerY, mouseX - centerX);
             if (mouseAngle < 0) mouseAngle += TWO_PI;
             
-            if (dist(mouseX, mouseY, centerX, centerY) < diameter/2 && 
-                mouseAngle > lastAngle && mouseAngle < lastAngle + angle) {
+            let d = dist(mouseX, mouseY, centerX, centerY);
+            if (d < diameter/2 && mouseAngle > lastAngle && mouseAngle < endAngle) {
                 
-                // Position text at a fixed point inside the slice (drop-down style)
-                let midAngle = lastAngle + angle / 2;
-                let textOffset = diameter * 0.3; // Distance from center
+                // Position text inside the slice
+                let midAngle = lastAngle + (endAngle - lastAngle) / 2;
+                let textOffset = diameter * 0.3; 
                 let tx = centerX + cos(midAngle) * textOffset;
                 let ty = centerY + sin(midAngle) * textOffset;
 
                 noStroke();
                 fill(255);
-                textSize(14); // Smaller text for a cleaner look
+                textSize(14);
                 textAlign(CENTER, CENTER);
                 text(`${label.toUpperCase()}\n${percent}%`, tx, ty);
             }
-            lastAngle += angle;
+            
+            // Update lastAngle for the next iteration
+            lastAngle = endAngle;
         });
     }
 
-    // Repositioned instruction text to avoid overlap with "The Deep Dive"
+    // Positioned to clear "The Deep Dive" footer
     fill(255, 180);
     textSize(16);
     textAlign(CENTER, CENTER);
-    text("click anywhere to continue", width / 2, height / 2 + 220);
+    text("click anywhere to continue", width / 2, height / 2 + 250);
 }
 
 // --- THE CLICK HANDLER ---
