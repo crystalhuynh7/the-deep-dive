@@ -182,15 +182,41 @@ async function saveToFirebase(reflection) {
         timestamp: Date.now(),
         top_aesthetic: Object.keys(aestheticResults)[0]
     };
-    await fetch(FIREBASE_URL, { method: 'POST', body: JSON.stringify(payload) });
-    await fetchArchive(); // Refresh mesh
-    state = 'ARCHIVE';
+    
+    try {
+        await fetch(FIREBASE_URL, { 
+            method: 'POST', 
+            body: JSON.stringify(payload) 
+        });
+        
+        // Refresh the local data so your new response appears in the mesh
+        await fetchArchive(); 
+        
+        // Move to the final "Archive Mesh" screen
+        state = 'ARCHIVE'; 
+    } catch (e) { 
+        console.error("Firebase save failed", e); 
+    }
 }
 
 // Function to handle the transition to the next step when ENTER is pressed
 function keyPressed() {
+    // 1. Logic for the Quiz Phase
     if (keyCode === ENTER && state === 'QUESTION') {
         processAnswer();
+    } 
+    
+    // 2. Logic for the Reflection Phase (NEW)
+    else if (keyCode === ENTER && state === 'REFLECT') {
+        const reflection = inputElement.value();
+        if (reflection.trim() !== '') {
+            // Send to database
+            saveToFirebase(reflection);
+            
+            // Clean up UI for the final mesh
+            inputElement.value('');
+            inputElement.position(-1000, -1000); 
+        }
     }
 }
 
