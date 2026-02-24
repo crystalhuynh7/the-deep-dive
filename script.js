@@ -14,6 +14,11 @@ let loadingAngle = 0; // For the spinner animation
 let archiveData = [];
 let meshParticles = [];
 
+// Color Transition Variables
+let currentColor;
+let lightBg;
+let darkBg;
+
 const QUESTIONS = [
     "you are walking into a cafe, what are you ordering?",
     "what are you wearing today?",
@@ -27,6 +32,11 @@ function setup() {
     let canvas = createCanvas(windowWidth, windowHeight);
     canvas.parent('app-container'); // Attach canvas to the main container
     
+    // Initialize Colors
+    lightBg = color(220, 220, 230);
+    darkBg = color(20, 20, 25);
+    currentColor = lightBg;
+
     // Set up text styles
     textSize(24);
     textAlign(CENTER, CENTER);
@@ -56,11 +66,16 @@ function setup() {
 
     // Initial fetch of the archive for the "moving mesh"
     fetchArchive();
-
-
 }
 
 function draw() {
+    // Only go dark for REFLECT (That's you, right?) and ARCHIVE (The Mesh)
+    let isDarkState = (state === 'RESULTS' || state === 'REFLECT' || state === 'ARCHIVE');
+    let target = isDarkState ? darkBg : lightBg;
+
+    // Smooth transition
+    currentColor = lerpColor(currentColor, target, 0.05);
+
     // 1. Draw the Background
     drawEtherealBackground();
 
@@ -112,8 +127,9 @@ function drawPieChartScreen() {
             }
 
             // Draw the Slice
-            fill(150, 180, 200 + (i * 10), 200);
-            stroke(255, 50);
+            // Slightly more transparent slices to look better on the darkening background
+            fill(150, 180, 200 + (i * 10), 180);
+            stroke(255, 30);
             arc(centerX, centerY, diameter, diameter, lastAngle, endAngle, PIE);
 
             // Hover Logic
@@ -131,7 +147,7 @@ function drawPieChartScreen() {
 
                 noStroke();
                 fill(255);
-                textSize(14);
+                textSize(12);
                 textAlign(CENTER, CENTER);
                 text(`${label.toUpperCase()}\n${percent}%`, tx, ty);
             }
@@ -147,7 +163,7 @@ function drawPieChartScreen() {
     drawingContext.shadowBlur = 10;
     fill(255, 180);
     textSize(16);
-    text("click anywhere to continue", width / 2, height / 2 + 250);
+    text("click anywhere to continue", width / 2, height / 2 + 230);
     pop();
 }
 
@@ -163,14 +179,15 @@ function mousePressed() {
 function drawReflectionScreen() {
     positionInput();
     push();
-    drawingContext.shadowColor = 'rgba(0,0,0,0.6)';
-    drawingContext.shadowBlur = 12;
+    applyShadow(12);
     fill(255);
-    textSize(28); // Larger
-    text("That's you, right?", width / 2, height / 2 - 100);
+    textAlign(CENTER, CENTER);
+    textSize(28); 
+    text("That's you, right?", width / 2, height / 2 - 60);
     
     textSize(14);
-    text("Type your reflection and press ENTER to archive your identity", width / 2, height / 2 + 100);
+    // Splitting this instruction text to avoid a long horizontal line
+    text("Type your reflection and press ENTER\nto archive your identity", width / 2, height / 2 + 100);
     pop();
 }
 
@@ -184,7 +201,7 @@ function drawArchiveMesh() {
     textAlign(CENTER, CENTER); // Force centering
     fill(255, 200);
     textSize(32);
-    text("The Collective Archive", width / 2, 100);
+    text("The Collective Archive", width / 2, height / 2);
     pop();
     
     meshParticles.forEach(p => {
