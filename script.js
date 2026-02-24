@@ -68,6 +68,13 @@ function setup() {
     fetchArchive();
 }
 
+function applyShadow() {
+    drawingContext.shadowColor = 'rgba(0,0,0,0.6)';
+    drawingContext.shadowBlur = 12;
+    drawingContext.shadowOffsetX = 0;
+    drawingContext.shadowOffsetY = 0;
+}
+
 function draw() {
     // Only go dark for REFLECT (That's you, right?) and ARCHIVE (The Mesh)
     let isDarkState = (state === 'RESULTS' || state === 'REFLECT' || state === 'ARCHIVE');
@@ -77,7 +84,7 @@ function draw() {
     currentColor = lerpColor(currentColor, target, 0.05);
 
     // 1. Draw the Background
-    drawEtherealBackground();
+    drawEtherealBackground(currentColor);
 
     // 2. GLOBAL HEADERS (Consistent on ALL screens)
     push();
@@ -126,7 +133,7 @@ function drawPieChartScreen() {
 
     // Instruction ABOVE the pie chart
     push();
-    applyShadow(10);
+    applyShadow();
     fill(255, 180);
     textSize(16);
     textAlign(CENTER, CENTER);
@@ -190,7 +197,7 @@ function mousePressed() {
 function drawReflectionScreen() {
     positionInput();
     push();
-    applyShadow(12);
+    applyShadow();
     fill(255);
     textAlign(CENTER, CENTER);
     textSize(28); 
@@ -207,8 +214,7 @@ function drawArchiveMesh() {
     inputElement.position(-1000, -1000);
     
     push();
-    drawingContext.shadowColor = 'rgba(0,0,0,0.6)';
-    drawingContext.shadowBlur = 12;
+    applyShadow();
     textAlign(CENTER, CENTER); // Force centering
     fill(255, 200);
     textSize(32);
@@ -309,14 +315,14 @@ function positionInput() {
 }
 
 // --- Drawing the Background (Ethereal Visuals) ---
-function drawEtherealBackground() {
-    let c1 = color(220, 220, 230, 200);
-    background(c1);
+function drawEtherealBackground(bgCol) {
+    background(bgCol || lightBg); // Use the passed color or default to light
     
-    // Add dynamic noise/lines to mimic the fractal/streaks
     noStroke();
     for (let i = 0; i < 100; i++) {
-        fill(255, 255, 255, 10);
+        // Subtle transparency adjustment for dark mode
+        let alphaVal = (state === 'QUESTION' || state === 'LOADING') ? 10 : 5;
+        fill(255, 255, 255, alphaVal);
         ellipse(
             noise(i * 0.1, frameCount * 0.005) * width, 
             noise(i * 0.2, frameCount * 0.007) * height, 
@@ -324,7 +330,6 @@ function drawEtherealBackground() {
         );
     }
 }
-
 
 // --- Drawing the Question Screen ---
 function drawQuestionScreen() {
@@ -337,11 +342,7 @@ function drawQuestionScreen() {
     textSize(16);
     if (drawingContext && drawingContext.save) drawingContext.save();
     // Soft black shadow behind white text
-    drawingContext.shadowColor = 'rgba(0,0,0,0.6)';
-    drawingContext.shadowBlur = 12;
-    drawingContext.shadowOffsetX = 0;
-    drawingContext.shadowOffsetY = 0;
-
+    applyShadow();
     fill(255); // White text
     text(QUESTIONS[currentQuestionIndex], width / 2, height / 2 - 50);
 
@@ -351,11 +352,7 @@ function drawQuestionScreen() {
     // Instruction text (smaller) — use a slightly smaller shadow blur
     textSize(16);
     if (drawingContext && drawingContext.save) drawingContext.save();
-    drawingContext.shadowColor = 'rgba(0,0,0,0.6)';
-    drawingContext.shadowBlur = 8;
-    drawingContext.shadowOffsetX = 0;
-    drawingContext.shadowOffsetY = 0;
-
+    applyShadow();
     fill(255);
     text("Press ENTER to submit", width / 2, height / 2 + 100);
 
