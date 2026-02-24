@@ -84,6 +84,18 @@ function draw() {
     text("who are you?", width / 2, height / 2 - 200);
     text("The Deep Dive", width / 2, height - 50);
 
+    // 2. GLOBAL HEADERS (Consistent on ALL screens)
+    push();
+    fill(255);
+    textAlign(CENTER, CENTER);
+    textFont('serif');
+    textSize(16); // Standard size matching the instructions/questions
+    
+    // Positioned exactly the same on every screen
+    text("who are you?", width / 2, height / 2 - 200);
+    text("The Deep Dive", width / 2, height - 50);
+    pop();
+
     // 3. Handle the current state (Question, Loading, or Results)
     switch (state) {
         case 'QUESTION':
