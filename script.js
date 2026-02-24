@@ -79,11 +79,6 @@ function draw() {
     // 1. Draw the Background
     drawEtherealBackground();
 
-    // 2. Draw the fixed text
-    fill(255); // White text
-    text("who are you?", width / 2, height / 2 - 200);
-    text("The Deep Dive", width / 2, height - 50);
-
     // 2. GLOBAL HEADERS (Consistent on ALL screens)
     push();
     fill(255);
@@ -118,6 +113,9 @@ function draw() {
 
 // --- 1. THE PIE CHART (Results) ---
 function drawPieChartScreen() {
+    // Only proceed if we are actually in the RESULTS state
+    if (state !== 'RESULTS') return;
+
     inputElement.position(-1000, -1000); 
     cursor(ARROW); // Keeps the mouse cursor as a normal pointer
     
@@ -125,6 +123,16 @@ function drawPieChartScreen() {
     let centerY = height / 2;
     let diameter = 280; // Smaller to prevent overlap
     let lastAngle = 0;
+
+    // Instruction ABOVE the pie chart
+    push();
+    applyShadow(10);
+    fill(255, 180);
+    textSize(16);
+    textAlign(CENTER, CENTER);
+    // Positioned above the chart (centerY - chart radius - extra padding)
+    text("click anywhere to continue", width / 2, centerY - 180); 
+    pop();
 
     if (aestheticResults) {
         let results = Object.entries(aestheticResults);
@@ -168,15 +176,6 @@ function drawPieChartScreen() {
             lastAngle = endAngle;
         });
     }
-
-    // Shadow for "Click anywhere"
-    push();
-    drawingContext.shadowColor = 'rgba(0,0,0,0.6)';
-    drawingContext.shadowBlur = 10;
-    fill(255, 180);
-    textSize(16);
-    text("click anywhere to continue", width / 2, height / 2 + 230);
-    pop();
 }
 
 // --- THE CLICK HANDLER ---
@@ -195,7 +194,7 @@ function drawReflectionScreen() {
     fill(255);
     textAlign(CENTER, CENTER);
     textSize(28); 
-    text("That's you, right?", width / 2, height / 2 - 60);
+    text("that's you, right?", width / 2, height / 2 - 60);
     
     textSize(14);
     // Splitting this instruction text to avoid a long horizontal line
