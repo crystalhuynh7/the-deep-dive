@@ -99,7 +99,12 @@ function setup() {
 function updateNavButtons() {
     if (!backButton || !nextButton || !restartButton) return;
 
-    // Default
+    // show everything by default
+    backButton.show();
+    nextButton.show();
+    restartButton.show();
+
+    // enable everything by default
     backButton.removeAttribute('disabled');
     nextButton.removeAttribute('disabled');
     restartButton.removeAttribute('disabled');
@@ -116,24 +121,31 @@ function updateNavButtons() {
     }
 
     if (state === 'RESULTS') {
+        // no going back to questions after results
         backButton.attribute('disabled', true);
     }
 
     if (state === 'REFLECT') {
+        // can go back to pie chart, but not forward
         nextButton.attribute('disabled', true);
     }
 
     if (state === 'ARCHIVE') {
-        nextButton.attribute('disabled', true);
+        // archive screen only has restart
+        backButton.hide();
+        nextButton.hide();
     }
 }
 
 function handleNext() {
     if (state === 'QUESTION') {
         processAnswer();
-    } else if (state === 'RESULTS') {
+    } 
+    
+    else if (state === 'RESULTS') {
         state = 'REFLECT';
     }
+
     updateNavButtons();
 }
 
@@ -142,9 +154,14 @@ function handleBack() {
         currentQuestionIndex--;
         inputElement.value(userResponses[currentQuestionIndex] || '');
         userResponses = userResponses.slice(0, currentQuestionIndex);
-    } else if (state === 'REFLECT') {
+    } 
+    
+    else if (state === 'REFLECT') {
         state = 'RESULTS';
+        inputElement.value('');
+        inputElement.position(-1000, -1000);
     }
+
     updateNavButtons();
 }
 
@@ -185,7 +202,7 @@ function draw() {
     
     // Positioned exactly the same on every screen
     text("who are you?", width / 2, height / 2 - 200);
-    text("The Deep Dive", width / 2, height - 50);
+    text("The Deep Dive", width / 2, height - 115);
     pop();
 
     // 3. Handle the current state (Question, Loading, or Results)
