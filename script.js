@@ -201,7 +201,7 @@ function draw() {
     
     // Positioned exactly the same on every screen
     text("who are you?", width / 2, height / 2 - 200);
-    text("The Deep Dive", width / 2, height - 90);
+    text("The Deep Dive", width / 2, height - 75);
     pop();
 
     // 3. Handle the current state (Question, Loading, or Results)
@@ -246,7 +246,7 @@ function drawPieChartScreen() {
     textSize(INSTRUCTION_SIZE);
     textAlign(CENTER, CENTER);
     // Positioned above the chart (centerY - chart radius - extra padding)
-    text("click next to continue", width / 2, centerY - 180);
+    text("click next to continue", width / 2, centerY - 160);
     pop();
 
     if (aestheticResults) {
