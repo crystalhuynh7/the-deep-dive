@@ -1,6 +1,17 @@
-// !!! CRITICAL: REPLACE THIS WITH YOUR ACTUAL LIVE RENDER API URL !!!
 const RENDER_API_ENDPOINT = "https://the-deep-dive-api.onrender.com" + "/classify";
 const FIREBASE_URL = "https://the-deep-dive-0-default-rtdb.firebaseio.com" + "/reflections.json";
+
+// --- Typography ---
+const TITLE_FONT = 'serif';
+const BODY_FONT = 'serif';
+
+const TITLE_SIZE = 16;
+const QUESTION_SIZE = 16;
+const INSTRUCTION_SIZE = 14;
+const RESULT_LABEL_SIZE = 12;
+const REFLECTION_TITLE_SIZE = 28;
+const ARCHIVE_TITLE_SIZE = 32;
+const LOADING_TITLE_SIZE = 30;
 
 // --- Global Variables for State Management ---
 let state = 'QUESTION'; // Controls which question/screen is visible ('QUESTION', 'LOADING', 'RESULTS')
@@ -9,6 +20,11 @@ let userResponses = [];
 let aestheticResults = null;
 let inputElement; // P5.js input element (the textbox)
 let loadingAngle = 0; // For the spinner animation
+
+// -- Variables for Navigation Buttons ---
+let backButton;
+let nextButton;
+let restartButton;
 
 // Archive for Mesh
 let archiveData = [];
@@ -46,6 +62,7 @@ function setup() {
     inputElement = createInput('');
     inputElement.size(500, 40);
     inputElement.style('font-size', '16px');
+    inputElement.style('font-family', 'serif');
     inputElement.style('padding', '5px');
     inputElement.style('border', 'none');
     inputElement.style('background', 'rgba(100, 100, 100, 0.5)'); // Semi-transparent dark background
@@ -66,6 +83,79 @@ function setup() {
 
     // Initial fetch of the archive for the "moving mesh"
     fetchArchive();
+
+    // Navigation controls
+    backButton = select('#back-btn');
+    nextButton = select('#next-btn');
+    restartButton = select('#restart-btn');
+
+    backButton.mousePressed(handleBack);
+    nextButton.mousePressed(handleNext);
+    restartButton.mousePressed(restartExperience);
+
+    updateNavButtons();
+}
+
+function updateNavButtons() {
+    if (!backButton || !nextButton || !restartButton) return;
+
+    // Default
+    backButton.removeAttribute('disabled');
+    nextButton.removeAttribute('disabled');
+    restartButton.removeAttribute('disabled');
+
+    if (state === 'QUESTION') {
+        if (currentQuestionIndex === 0) {
+            backButton.attribute('disabled', true);
+        }
+    }
+
+    if (state === 'LOADING') {
+        backButton.attribute('disabled', true);
+        nextButton.attribute('disabled', true);
+    }
+
+    if (state === 'RESULTS') {
+        backButton.attribute('disabled', true);
+    }
+
+    if (state === 'REFLECT') {
+        nextButton.attribute('disabled', true);
+    }
+
+    if (state === 'ARCHIVE') {
+        nextButton.attribute('disabled', true);
+    }
+}
+
+function handleNext() {
+    if (state === 'QUESTION') {
+        processAnswer();
+    } else if (state === 'RESULTS') {
+        state = 'REFLECT';
+    }
+    updateNavButtons();
+}
+
+function handleBack() {
+    if (state === 'QUESTION' && currentQuestionIndex > 0) {
+        currentQuestionIndex--;
+        inputElement.value(userResponses[currentQuestionIndex] || '');
+        userResponses = userResponses.slice(0, currentQuestionIndex);
+    } else if (state === 'REFLECT') {
+        state = 'RESULTS';
+    }
+    updateNavButtons();
+}
+
+function restartExperience() {
+    state = 'QUESTION';
+    currentQuestionIndex = 0;
+    userResponses = [];
+    aestheticResults = null;
+    inputElement.value('');
+    positionInput();
+    updateNavButtons();
 }
 
 function applyShadow() {
@@ -90,8 +180,8 @@ function draw() {
     push();
     fill(255);
     textAlign(CENTER, CENTER);
-    textFont('serif');
-    textSize(16); // Standard size matching the instructions/questions
+    textFont(TITLE_FONT);
+    textSize(TITLE_SIZE); // Standard size matching the instructions/questions
     
     // Positioned exactly the same on every screen
     text("who are you?", width / 2, height / 2 - 200);
@@ -116,6 +206,7 @@ function draw() {
             drawArchiveMesh();
             break;
     }
+    updateNavButtons();
 }
 
 // --- 1. THE PIE CHART (Results) ---
@@ -135,7 +226,8 @@ function drawPieChartScreen() {
     push();
     applyShadow();
     fill(255, 180);
-    textSize(16);
+    textFont(BODY_FONT);
+    textSize(INSTRUCTION_SIZE);
     textAlign(CENTER, CENTER);
     // Positioned above the chart (centerY - chart radius - extra padding)
     text("click anywhere to continue", width / 2, centerY - 180); 
@@ -174,7 +266,8 @@ function drawPieChartScreen() {
 
                 noStroke();
                 fill(255);
-                textSize(12);
+                textFont(BODY_FONT);
+                textSize(RESULT_LABEL_SIZE);
                 textAlign(CENTER, CENTER);
                 text(`${label.toUpperCase()}\n${percent}%`, tx, ty);
             }
@@ -190,6 +283,7 @@ function mousePressed() {
     // If the user is on the Results screen, clicking moves them to Reflection
     if (state === 'RESULTS') {
         state = 'REFLECT';
+        updateNavButtons();
     }
 }
 
@@ -200,10 +294,11 @@ function drawReflectionScreen() {
     applyShadow();
     fill(255);
     textAlign(CENTER, CENTER);
-    textSize(28); 
+    textFont(TITLE_FONT);
+    textSize(REFLECTION_TITLE_SIZE); 
     text("that's you, right?", width / 2, height / 2 - 60);
     
-    textSize(14);
+    textSize(INSTRUCTION_SIZE);
     // Splitting this instruction text to avoid a long horizontal line
     text("Type your reflection and press ENTER\nto archive your identity", width / 2, height / 2 + 100);
     pop();
@@ -217,7 +312,8 @@ function drawArchiveMesh() {
     applyShadow();
     textAlign(CENTER, CENTER); // Force centering
     fill(255, 200);
-    textSize(32);
+    textFont(BODY_FONT);
+    textSize(ARCHIVE_TITLE_SIZE);
     text("The Collective Archive", width / 2, height / 2);
     pop();
     
@@ -249,6 +345,7 @@ async function saveToFirebase(reflection) {
     
     // Switch state immediately for a "fast" feel
     state = 'ARCHIVE'; 
+    updateNavButtons();
 
     try {
         await fetch(FIREBASE_URL, { 
@@ -298,7 +395,7 @@ class Particle {
     }
     display() {
         fill(255, 120);
-        textSize(12);
+        textSize(BODY_FONT);
         text(this.txt, this.pos.x, this.pos.y);
     }
 }
@@ -339,7 +436,7 @@ function drawQuestionScreen() {
     // Save/restore drawing context around shadow changes so other elements aren't affected
 
     // Question text (larger)
-    textSize(16);
+    textSize(QUESTION_SIZE);
     if (drawingContext && drawingContext.save) drawingContext.save();
     // Soft black shadow behind white text
     applyShadow();
@@ -350,7 +447,7 @@ function drawQuestionScreen() {
     if (drawingContext && drawingContext.restore) drawingContext.restore();
 
     // Instruction text (smaller) — use a slightly smaller shadow blur
-    textSize(16);
+    textSize(INSTRUCTION_SIZE);
     if (drawingContext && drawingContext.save) drawingContext.save();
     applyShadow();
     fill(255);
@@ -366,7 +463,8 @@ function drawLoadingScreen() {
     inputElement.position(-1000, -1000); 
     
     fill(255);
-    textSize(30);
+    textSize(LOADING_TITLE_SIZE);
+    textFont(TITLE_FONT);
     text("you are....", width / 2, height / 2 - 50);
     
     // Draw the spinning circle loader
