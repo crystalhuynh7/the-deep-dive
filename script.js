@@ -144,9 +144,8 @@ function handleNext() {
     
     else if (state === 'RESULTS') {
         state = 'REFLECT';
+        updateNavButtons();
     }
-
-    updateNavButtons();
 }
 
 function handleBack() {
@@ -202,7 +201,7 @@ function draw() {
     
     // Positioned exactly the same on every screen
     text("who are you?", width / 2, height / 2 - 200);
-    text("The Deep Dive", width / 2, height - 115);
+    text("The Deep Dive", width / 2, height - 90);
     pop();
 
     // 3. Handle the current state (Question, Loading, or Results)
@@ -247,7 +246,7 @@ function drawPieChartScreen() {
     textSize(INSTRUCTION_SIZE);
     textAlign(CENTER, CENTER);
     // Positioned above the chart (centerY - chart radius - extra padding)
-    text("click anywhere to continue", width / 2, centerY - 180); 
+    text("click next to continue", width / 2, centerY - 180);
     pop();
 
     if (aestheticResults) {
@@ -295,7 +294,7 @@ function drawPieChartScreen() {
     }
 }
 
-// --- THE CLICK HANDLER ---
+/* --- THE CLICK HANDLER ---
 function mousePressed() {
     // If the user is on the Results screen, clicking moves them to Reflection
     if (state === 'RESULTS') {
@@ -303,6 +302,7 @@ function mousePressed() {
         updateNavButtons();
     }
 }
+*/
 
 // --- 2. THE REFLECTION ("That's you, right?") ---
 function drawReflectionScreen() {
